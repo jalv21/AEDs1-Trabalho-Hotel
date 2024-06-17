@@ -28,24 +28,49 @@ typedef struct Tcliente cliente;
 
 // função para cadastrar um cliente
 void cadCliente() {
-  cliente cli, arrCli[4];
-
+  cliente cli;
+  int codCli, telCli;
+  char nomeCli[100], endCli[200];
+  
   cli.codigo = geraCodigo(gerarMin(), gerarMax());
+  codCli = geraCodigo(gerarMin(), gerarMax()); 
+
+  while(codCli == cli.codigo) {
+    codCli = geraCodigo(gerarMin(), gerarMax());
+  }
+
+  cli.codigo = codCli;
 
   limparBuffer();
-
+  
   printf(">> CADASTRAR UM CLIENTE \n\n");
 
   printf("Digite o nome do cliente: ");
-  fgets(cli.nome, sizeof(cli.nome), stdin);
-  cli.nome[strcspn(cli.nome, "\n")] = '\0';
+  
+  if(fgets(nomeCli, sizeof(nomeCli), stdin) == NULL) {
+    printf("Erro ao ler o nome do cliente.");
+  }
+  
+  strcpy(cli.nome, nomeCli);
+  nomeCli[strcspn(nomeCli, "\n")] = '\0';
 
   printf("Digite o endereço do cliente: ");
-  fgets(cli.ender, sizeof(cli.ender), stdin);
-  cli.ender[strcspn(cli.ender, "\n")] = '\0';
+  
+  if(fgets(endCli, sizeof(endCli), stdin) == NULL) {
+    printf("Erro ao ler o endereço do cliente. ");
+  }
+  
+  strcpy(cli.ender, endCli);
+  endCli[strcspn(endCli, "\n")] = '\0';
 
   printf("Digite o telefone do cliente: ");
-  scanf("%i", &cli.telefone);
+    
+  if(scanf("%i", &telCli) != 1) {
+    printf("Erro ao let o telefone do cliente. ");
+    limparBuffer();
+  }
+  
+  cli.telefone = telCli;
 
   limparBuffer();
 
@@ -79,20 +104,36 @@ void cadFuncionario() {
   printf(">> CADASTRAR UM FUNCIONÁRIO \n\n");
 
   printf("Digite o nome do funcionário: ");
-  fgets(fun.nome, sizeof(fun.nome), stdin);
+  
+  if(fgets(fun.nome, sizeof(fun.nome), stdin) == NULL) {
+    printf("Erro ao ler o nome do funcionário. ");
+  }
+  
   fun.nome[strcspn(fun.nome, "\n")] = '\0';
 
   printf("Digite o telefone do funcionário: ");
-  scanf("%i", &fun.telefone);
+  
+  if(scanf("%i", &fun.telefone) != 1) {
+    printf("Erro ao ler o telefone do usuário");
+    limparBuffer();
+  }
 
   limparBuffer();
 
   printf("Digite o cargo do funcionário: ");
-  fgets(fun.cargo, sizeof(fun.cargo), stdin);
+  
+  if(fgets(fun.cargo, sizeof(fun.cargo), stdin) == NULL) {
+    printf("Erro ao ler o cargo do funcionário");
+  }
+  
   fun.cargo[strcspn(fun.cargo, "\n")] = '\0';
 
   printf("Digite o salário do funcionário: ");
-  scanf("%f", &fun.salario);
+  
+  if(scanf("%f", &fun.salario) != 1) {
+    printf("Erro ao ler o salário do funcionário.");
+    limparBuffer();
+  }
 
   limparBuffer();
 
@@ -124,16 +165,34 @@ void cadQuarto() {
   printf(">> CADASTRAR UM QUARTO \n\n");
 
   printf("Digite o número do quarto: ");
-  scanf("%i", &quarto.numero);
+  
+  if(scanf("%i", &quarto.numero) != 1) {
+    printf("Erro ao ler o número do quarto.");
+    limparBuffer();
+  }
 
   printf("Digite a quantidade de hóspedes: ");
-  scanf("%i", &quarto.quantHosp);
+  
+  if(scanf("%i", &quarto.quantHosp) != 1) {
+    printf("Erro ao ler a quantidade de hóspedes.");
+    limparBuffer();
+  }
 
   printf("Digite o valor da diária: ");
-  scanf("%f", &quarto.diaria);
+  
+  if(scanf("%f", &quarto.diaria) != 1) {
+    printf("Erro ao ler o valor da diaria.");
+    limparBuffer();
+  }
+  
 
   printf("O quarto está ocupado? (0 não, 1 sim) ");
-  scanf("%i", &ocupado);
+  
+  if(scanf("%i", &ocupado) != 1) {
+    printf("Erro ao ler o status do quarto. ");
+    limparBuffer();
+  };
+  
 
   if(ocupado != 0 && ocupado != 1) {
     printf("ERRO! Status do quarto inválido!");
@@ -176,7 +235,7 @@ int geraCodigo(int min, int max) {
   printf("mínimo do código: %i \n", min);
   printf("máximo do código: %i \n", max);
   printf("código gerado: %i \n\n", codigo);
-  return codigo;
+  return 100;
 }
 
 

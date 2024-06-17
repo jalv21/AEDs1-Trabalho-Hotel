@@ -1,2 +1,3 @@
+run = "gcc ./codigo/main.c -o main && ./main"
 [nix]
 channel = "stable-23_11"

@@ -23,7 +23,9 @@ int main() {
   printf("7 - SAIR \n\n");
 
   // Leitura da escolha
-  scanf("%i", &escolha);
+  if(scanf("%i", &escolha) != 1) {
+    printf("Erro ao ler a escolha.");
+  }
   printf("\n\n");
 
   //loop do menu até escolher "SAIR"
@@ -52,7 +54,9 @@ int main() {
     printf("6 - Dar baixa em estadia \n");
     printf("7 - SAIR \n\n");
 
-    scanf("%i", &escolha);
+    if(scanf("%i", &escolha) != 1) {
+      printf("Erro ao ler a escolha.");
+    }
   }
   return 0;
 }
