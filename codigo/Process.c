@@ -232,9 +232,6 @@ long int gerarMax() {
 // função para gerar um código aleatório
 int geraCodigo(int min, int max) {
   int codigo = rand() % (max - min + 1) + min;
-  printf("mínimo do código: %i \n", min);
-  printf("máximo do código: %i \n", max);
-  printf("código gerado: %i \n\n", codigo);
   return 100;
 }
 
