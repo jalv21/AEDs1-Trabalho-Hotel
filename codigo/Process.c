@@ -232,7 +232,7 @@ long int gerarMax() {
 // função para gerar um código aleatório
 int geraCodigo(int min, int max) {
   int codigo = rand() % (max - min + 1) + min;
-  return 100;
+  return codigo;
 }
 
 
