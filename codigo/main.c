@@ -19,11 +19,18 @@ Data de início: 14 Jun. 2024
 #include "Process.h"
 
 int main() {
+  FILE *f;
+  int escolha;
   setlocale(LC_ALL, "portuguese");
   srand(time(NULL));
-  int escolha;
 
-  // Exibição do menu
+  if((f = fopen("teste.dat", "r+b")) == NULL) {
+    if((f = fopen("teste.dat", "w+b")) == NULL) {
+      printf("Erro! O arquivo não foi criado!");
+      exit(1);
+    }
+  }
+
   printf("=== BEM-VINDO AO HOTEL DESCANSO GARANTIDO === \n\n");
   printf("Menu \n\n");
   printf("1 - Cadastrar um cliente \n");
@@ -34,17 +41,15 @@ int main() {
   printf("6 - Dar baixa em estadia \n");
   printf("7 - SAIR \n\n");
 
-  // Leitura da escolha
   if (scanf("%i", &escolha) != 1) {
     printf("Erro ao ler a escolha.");
   }
   printf("\n\n");
 
-  // loop do menu até escolher "SAIR"
   while (escolha != 7 && escolha < 7 && escolha > 0) {
     switch (escolha) {
     case 1:
-      cadCliente();
+      cadCliente(f);
       break;
     case 2:
       cadFuncionario();
@@ -59,19 +64,21 @@ int main() {
     case 6: /*função*/;
       break;
     }
-    printf("=== BEM-VINDO AO HOTEL DESCANSO GARANTIDO === \n\n");
-    printf("Menu \n\n");
-    printf("1 - Cadastrar um cliente \n");
-    printf("2 - Cadastrar um funcionário \n");
-    printf("3 - Cadastrar um quarto \n");
-    printf("4 - Cadastrar uma estadia \n");
-    printf("5 - Pesquisar \n");
-    printf("6 - Dar baixa em estadia \n");
-    printf("7 - SAIR \n\n");
 
-    if (scanf("%i", &escolha) != 1) {
-      printf("Erro ao ler a escolha.");
-    }
+  printf("=== BEM-VINDO AO HOTEL DESCANSO GARANTIDO === \n\n");
+  printf("Menu \n\n");
+  printf("1 - Cadastrar um cliente \n");
+  printf("2 - Cadastrar um funcionário \n");
+  printf("3 - Cadastrar um quarto \n");
+  printf("4 - Cadastrar uma estadia \n");
+  printf("5 - Pesquisar \n");
+  printf("6 - Dar baixa em estadia \n");
+  printf("7 - SAIR \n\n");
+
+  if (scanf("%i", &escolha) != 1) {
+    printf("Erro ao ler a escolha.");
+  }
+  printf("\n\n");
   }
   return 0;
 }

@@ -12,14 +12,15 @@ void cadEstadia()
 Autor: J
 Data de início: 14 Jun. 2024
 */
-
+#include <stdio.h>
 #ifndef PROCESS_H
 #define PROCESS_H
 
-void cadCliente();
+void cadCliente(FILE *f);
 void cadFuncionario();
 void cadQuarto();
 void cadEstadia();
+int localizaCliente(FILE *f, int codigo);
 
 #endif 
 
