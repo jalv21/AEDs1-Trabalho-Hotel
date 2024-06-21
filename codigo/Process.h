@@ -17,10 +17,9 @@ Data de início: 14 Jun. 2024
 #define PROCESS_H
 
 void cadCliente(FILE *f);
-void cadFuncionario();
-void cadQuarto();
-void cadEstadia();
-int localizaCliente(FILE *f, int codigo);
+void cadFuncionario(FILE *f);
+void cadQuarto(FILE *f);
+void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua);
 
 #endif 
 

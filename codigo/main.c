@@ -19,13 +19,34 @@ Data de início: 14 Jun. 2024
 #include "Process.h"
 
 int main() {
-  FILE *f;
+  FILE *cliFile, *funFile, *quaFile, *estFile;
   int escolha;
   setlocale(LC_ALL, "portuguese");
   srand(time(NULL));
 
-  if((f = fopen("teste.dat", "r+b")) == NULL) {
-    if((f = fopen("teste.dat", "w+b")) == NULL) {
+  if((cliFile = fopen("clientes.dat", "r+b")) == NULL) {
+    if((cliFile = fopen("clientes.dat", "w+b")) == NULL) {
+      printf("Erro! O arquivo não foi criado!");
+      exit(1);
+    }
+  }
+
+  if((funFile = fopen("funcionarios.dat", "r+b")) == NULL) {
+    if((funFile = fopen("funcionarios.dat", "w+b")) == NULL) {
+      printf("Erro! O arquivo não foi criado!");
+      exit(1);
+    }
+  }
+
+  if((quaFile = fopen("quartos.dat", "r+b")) == NULL) {
+    if((quaFile = fopen("quartos.dat", "w+b")) == NULL) {
+      printf("Erro! O arquivo não foi criado!");
+      exit(1);
+    }
+  }
+
+  if((estFile = fopen("estadias.dat", "r+b")) == NULL) {
+    if((estFile = fopen("estadias.dat", "w+b")) == NULL) {
       printf("Erro! O arquivo não foi criado!");
       exit(1);
     }
@@ -49,15 +70,15 @@ int main() {
   while (escolha != 7 && escolha < 7 && escolha > 0) {
     switch (escolha) {
     case 1:
-      cadCliente(f);
+      cadCliente(cliFile);
       break;
     case 2:
-      cadFuncionario();
+      cadFuncionario(funFile);
       break;
     case 3:
-      cadQuarto();
+      cadQuarto(quaFile);
       break;
-    case 4: cadEstadia();
+    case 4: cadEstadia(estFile, cliFile, quaFile);
       break;
     case 5: /*função*/;
       break;

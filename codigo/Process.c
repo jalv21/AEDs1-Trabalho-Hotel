@@ -1,9 +1,11 @@
-/*  
+/*
 Este é o arquivo "Process.c"
 
-Descrição: Este é o arquivo contendo o código da biblioteca "Process", que implementa as principais funções que são utilizadas pelo programa principal no "main.c" e as que são utilizadas na própria biblioteca para complementá-las
+Descrição: Este é o arquivo contendo o código da biblioteca "Process", que
+implementa as principais funções que são utilizadas pelo programa principal no
+"main.c" e as que são utilizadas na própria biblioteca para complementá-las
 
-Funções: 
+Funções:
 void limparEntrada()
 
 int gerarMin()
@@ -19,36 +21,20 @@ Autor: J
 Data de início: 14 Jun. 2024
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-void limparEntrada();
-int geraCodigo(int min, int max);
-
-void limparEntrada() {
-  /*
-  Este é o procedimento limparEntrada().
-
-  Descrição: O procedimento lê um caractere da entrada e a percorre até econtrar uma nova linha ou fim de arquivo, com o objetivo de descartar os caracteres da entrada para limpar o buffer
-
-  Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o código não vai retornar um valor.
-  */
-
-  int c;
-  while ((c = getchar()) != '\n' && c != EOF)
-    ;
-}
 
 struct Tcliente {
   /*
   Esta é uma estrutura para os dados do Cliente.
 
-  Descrição: a estrutura declara variáveis com os dados do código, nome, endereço e telefone do usuário, que serão 
-  preenchidos no procedimento de cadastro de cliente. 
+  Descrição: a estrutura declara variáveis com os dados do código, nome,
+  endereço e telefone do usuário, que serão preenchidos no procedimento de
+  cadastro de cliente.
 
   Atributos:
   int codigo
@@ -64,24 +50,94 @@ struct Tcliente {
 };
 typedef struct Tcliente cliente;
 
-int localizaCliente(FILE *f, int codigo) {
-  int posicao = 1, achou = 0;
+struct Tfuncionario {
+  /*
+  Esta é uma estrutura para os dados do funcionário.
 
+  Descrição: a estrutura declara variáveis com os dados do código, nome,
+  telefone, cargo e salário do funcionário, que serão preenchidos no
+  procedimento de cadastro de funcionário
+
+  Atributos:
+  int codigo
+  char nome[100]
+  int telefone
+  char cargo[80]
+  float salario
+  */
+
+  int codigo;
+  char nome[100];
+  int telefone;
+  char cargo[80];
+  float salario;
+};
+typedef struct Tfuncionario funcionario;
+
+struct Tquarto {
+  /*
+  Esta é uma estrutura para os dados do quarto.
+
+  Descrição: a estrutura declara variáveis com os dados do número do quarto a
+  ser cadastrado, a quantidade de hóspedes, o valor da diária e o status do
+  quarto (ocupado e desocupado)
+
+  Atributos:
+  int numero
+  int quantHosp
+  float diaria
+  char status[10]
+  */
+
+  int numero;
+  int quantHosp;
+  float diaria;
+  char status[10];
+};
+typedef struct Tquarto quarto;
+
+struct Testadia {
+  int codCli;
+  int quantHosp;
+  int dataEntrada;
+  int dataSaida;
+};
+typedef struct Testadia estadia;
+
+void limparEntrada();
+int geraCodigo(int min, int max);
+int localizaCliente(FILE *f, int codigo);
+int localizaFuncionario(FILE *f, int codigo);
+int localizaQuarto(FILE *f, int numero);
+int localizaQuartoPorQtd(FILE *f, int quantHosp);
+int calculaDiarias(int checkin, int checkout);
+int localizaEstadia(FILE *f, int codigo);
+
+void limparEntrada() {
+  /*
+  Este é o procedimento limparEntrada().
+
+  Descrição: O procedimento lê um caractere da entrada e a percorre até econtrar
+  uma nova linha ou fim de arquivo, com o objetivo de descartar os caracteres da
+  entrada para limpar o buffer
+
+  Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o
+  código não vai retornar um valor.
+  */
+
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF)
+    ;
+}
+
+void lerClientes(FILE *f) {
   cliente cli;
-  fseek(f, 0, SEEK_SET);
-  fread(&cli, sizeof(cli), 1, f);
-
-  while(!feof(f) && !achou) {
-    posicao++;
-    if(cli.codigo == codigo) {
-      achou = 1;
-    }
-    fread(&cli, sizeof(cli), 1, f);
-  }
-  if(achou) {
-    return posicao;
-  } else {
-    return -1;
+  fseek(f, 0, SEEK_SET); // Voltar ao início do arquivo
+  while (fread(&cli, sizeof(cli), 1, f) == 1) {
+    printf("Código: %d\n", cli.codigo);
+    printf("Nome: %s\n", cli.nome);
+    printf("Endereço: %s\n", cli.ender);
+    printf("Telefone: %d\n\n", cli.telefone);
   }
 }
 
@@ -89,9 +145,12 @@ void cadCliente(FILE *f) {
   /*
     Este é o procedimento cadCliente().
 
-    Descrição: O procedimento é reponsável por ler informações do cliente e guardá-las na estrutura Tcliente, tal como gerar automaticamente um código para o cliente e evitar a repetição de códigos para clientes diferentes.
+    Descrição: O procedimento é reponsável por ler informações do cliente e
+    guardá-las na estrutura Tcliente, tal como gerar automaticamente um código
+    para o cliente e evitar a repetição de códigos para clientes diferentes.
 
-    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o código não vai retornar um valor.
+    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o
+    código não vai retornar um valor.
   */
 
   cliente cli;
@@ -100,8 +159,10 @@ void cadCliente(FILE *f) {
   cli.codigo = geraCodigo(10000, 99999);
   fflush(stdin);
   posicao = localizaCliente(f, cli.codigo);
-  while(posicao != -1) {
+
+  while (posicao != -1) {
     cli.codigo = geraCodigo(10000, 99999);
+    posicao = localizaCliente(f, cli.codigo);
   }
 
   limparEntrada();
@@ -124,297 +185,272 @@ void cadCliente(FILE *f) {
   fflush(f);
 
   printf("\n");
-  /* posicao = localizaCliente(f, cli.codigo);
-  if(posicao == -1) {
-    limparEntrada();
-    printf(">> CADASTRAR UM CLIENTE \n\n");
 
-    printf("Digite o nome do cliente: ");
-    fgets(cli.nome, sizeof(cli.nome), stdin);
-    cli.nome[strcspn(cli.nome, "\n")] = '\0';
-
-    printf("Digite o endereço do cliente: ");
-    fgets(cli.ender, sizeof(cli.ender), stdin);
-    cli.ender[strcspn(cli.ender, "\n")] = '\0';
-
-    printf("Digite o telefone do cliente: ");
-    scanf("%i", &cli.telefone);
-    limparEntrada();
-
-    printf("\n");
-
-    fseek(f,0,SEEK_END);
-    fwrite(&cli, sizeof(cli), 1, f);
-    fflush(f);
-  }  */
+  lerClientes(f);
 }
 
-struct Tfuncionario {
-  /*
-  Esta é uma estrutura para os dados do funcionário.
+void lerFuncionarios(FILE *f) {
+  funcionario fun;
+  fseek(f, 0, SEEK_SET); // Voltar ao início do arquivo
+  while (fread(&fun, sizeof(fun), 1, f) == 1) {
+    printf("Código: %d\n", fun.codigo);
+    printf("Nome: %s\n", fun.nome);
+    printf("Cargo: %s\n", fun.cargo);
+    printf("Telefone: %i\n", fun.telefone);
+    printf("Salário: R$ %.2f\n\n", fun.salario);
+  }
+}
 
-  Descrição: a estrutura declara variáveis com os dados do código, nome, telefone, cargo e salário do funcionário, que
-  serão preenchidos no procedimento de cadastro de funcionário
-
-  Atributos:
-  int codigo
-  char nome[100]
-  int telefone
-  char cargo[80]
-  float salario
-  */
-
-  int codigo;
-  char nome[100];
-  int telefone;
-  char cargo[80];
-  float salario;
-};
-typedef struct Tfuncionario funcionario;
-
-void cadFuncionario() {
+void cadFuncionario(FILE *f) {
   /*
     Este é o procedimento cadFuncionario().
 
-    Descrição: O procedimento é reponsável por ler informações do funcionário e guardá-las na estrutura Tfuncionario, tal como gerar automaticamente um código para o funcionário e evitar a repetição de códigos para funcionários diferentes.
+    Descrição: O procedimento é reponsável por ler informações do funcionário e
+    guardá-las na estrutura Tfuncionario, tal como gerar automaticamente um
+    código para o funcionário e evitar a repetição de códigos para funcionários
+    diferentes.
 
-    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o código não vai retornar um valor.
+    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o
+    código não vai retornar um valor.
   */
 
   funcionario fun;
-  int codEnter, telEnter;
-  float salEnter;
-  char nomeEnter[100], cargoEnter[80];
+  int posicao;
 
   fun.codigo = geraCodigo(10000, 99999);
-  codEnter = geraCodigo(10000, 99999);
+  fflush(stdin);
+  posicao = localizaFuncionario(f, fun.codigo);
 
-  while(codEnter == fun.codigo) {
-    codEnter = geraCodigo(10000, 99999);
+  while(posicao != -1) {
+    fun.codigo = geraCodigo(10000, 99999);
+    posicao = localizaFuncionario(f, fun.codigo);
   }
 
-  fun.codigo = codEnter;
-
   limparEntrada();
-
   printf(">> CADASTRAR UM FUNCIONÁRIO \n\n");
 
   printf("Digite o nome do funcionário: ");
-
-  if (fgets(nomeEnter, sizeof(nomeEnter), stdin) == NULL) {
-    printf("Erro ao ler o nome do funcionário. ");
-  }
-
-  strcpy(fun.nome, nomeEnter);
-  nomeEnter[strcspn(nomeEnter, "\n")] = '\0';
-
-  printf("Digite o telefone do funcionário: ");
-
-  if (scanf("%i", &telEnter) != 1) {
-    printf("Erro ao ler o telefone do usuário");
-    limparEntrada();
-  }
-
-  fun.telefone = telEnter;
-
-  limparEntrada();
+  fgets(fun.nome, sizeof(fun.nome), stdin);
+  fun.nome[strcspn(fun.nome, "\n")] = '\0';
 
   printf("Digite o cargo do funcionário: ");
+  fgets(fun.cargo, sizeof(fun.cargo), stdin);
+  fun.cargo[strcspn(fun.cargo, "\n")] = '\0';
 
-  if (fgets(cargoEnter, sizeof(cargoEnter), stdin) == NULL) {
-    printf("Erro ao ler o cargo do funcionário");
-  }
-
-  strcpy(fun.cargo, cargoEnter);
-  cargoEnter[strcspn(cargoEnter, "\n")] = '\0';
-
-  printf("Digite o salário do funcionário: ");
-
-  if (scanf("%f", &salEnter) != 1) {
-    printf("Erro ao ler o salário do funcionário.");
-    limparEntrada();
-  }
-
-  fun.salario = salEnter;
-
+  printf("Digite o telefone do funcionário: ");
+  scanf("%i", &fun.telefone);
   limparEntrada();
 
-  /* printf("\n");
+  printf("Digite o salário do funcionário: ");
+  scanf("%f", &fun.salario);
 
-  printf("%s", fun.nome);
-  printf("%i\n", fun.telefone);
-  printf("%s", fun.cargo);
-  printf("%.2f\n", fun.salario); */
+  fseek(f, 0, SEEK_END);
+  fwrite(&fun, sizeof(fun), 1, f);
+  fflush(f);
 
   printf("\n");
+
+  lerFuncionarios(f);
 }
 
-struct Tquarto {
-  /*
-  Esta é uma estrutura para os dados do quarto.
+void lerQuartos(FILE *f) {
+  quarto qua;
+  fseek(f, 0, SEEK_SET); // Voltar ao início do arquivo
+  while (fread(&qua, sizeof(qua), 1, f) == 1) {
+    printf("Número: %d\n", qua.numero);
+    printf("Quantidade de hóspedes: %i\n", qua.quantHosp);
+    printf("Valor da diária: R$ %.2f\n", qua.diaria);
+    printf("O quarto está %s.\n\n", qua.status);
+  }
+}
 
-  Descrição: a estrutura declara variáveis com os dados do número do quarto a ser cadastrado, a quantidade de hóspedes, o 
-  valor da diária e o status do quarto (ocupado e desocupado)
-
-  Atributos:
-  int numero
-  int quantHosp
-  float diaria
-  char status[10]
-  */
-
-  int numero;
-  int quantHosp;
-  float diaria;
-  char status[10];
-};
-typedef struct Tquarto quarto;
-
-void cadQuarto() {
+void cadQuarto(FILE *f) {
   /*
     Este é o procedimento cadQuarto().
 
-    Descrição: O procedimento é reponsável por ler informações do quarto e guardá-las na estrutura Tquarto, tal como 
-    processar o número inserido pelo usuário e atribuir o status ao quarto e garantir que quartos diferentes não tenham o 
-    mesmo número.
+    Descrição: O procedimento é reponsável por ler informações do quarto e
+    guardá-las na estrutura Tquarto, tal como processar o número inserido pelo
+    usuário e atribuir o status ao quarto e garantir que quartos diferentes não
+    tenham o mesmo número.
 
-    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o código não vai retornar um valor.
+    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o
+    código não vai retornar um valor.
   */
 
-  quarto qrt;
-  int numEnter, ocupado;
+  quarto qua;
+  int ocupado;
 
   limparEntrada();
-
   printf(">> CADASTRAR UM QUARTO \n\n");
 
   printf("Digite o número do quarto: ");
+  scanf("%i", &qua.numero);
+  int posicao = localizaQuarto(f, qua.numero);
 
-  if (scanf("%i", &numEnter) != 1) {
-    printf("Erro ao ler o número do quarto.");
-    limparEntrada();
+  while(qua.numero <= 0) {
+    printf("\nErro! Número de quarto inválido!\n");
+    printf("Digite outro número: ");
+    scanf("%i", &qua.numero);
   }
 
-  while(numEnter <= 0) {
-    printf("\nErro! Nº de quarto inválido! Digite um novo número: ");
-    if (scanf("%i", &numEnter) != 1) {
-      printf("Erro ao ler o número do quarto.");
-      limparEntrada();
-    }
-  } 
-
-  while(numEnter == qrt.numero) {
-    printf("\nErro! Já existe um quarto com esse número! Digite um novo número: ");
-    if (scanf("%i", &numEnter) != 1) {
-      printf("Erro ao ler o número do quarto.");
-      limparEntrada();
-    }
+  while(posicao != -1) {
+    printf("\nErro! Já há um quarto com esse número!\n");
+    printf("Digite outro número: ");
+    scanf("%i", &qua.numero);
+    posicao = localizaQuarto(f, qua.numero);
   }
-
-  qrt.numero = numEnter;
 
   printf("Digite a quantidade de hóspedes: ");
-
-  if (scanf("%i", &qrt.quantHosp) != 1) {
-    printf("Erro ao ler a quantidade de hóspedes.");
-    limparEntrada();
-  }
+  scanf("%i", &qua.quantHosp);
 
   printf("Digite o valor da diária: ");
+  scanf("%f", &qua.diaria);
 
-  if (scanf("%f", &qrt.diaria) != 1) {
-    printf("Erro ao ler o valor da diaria.");
-    limparEntrada();
+  printf("Digite o status do quarto (0 desocupado, 1 ocupado): ");
+  scanf("%i", &ocupado);
+
+  while(ocupado != 0 && ocupado != 1) {
+    printf("\nErro! Status de quarto inválido! \n");
+    printf("Digite novamente: ");
+    scanf("%i", &ocupado);
   }
 
-  printf("O quarto está ocupado? (0 não, 1 sim): ");
-
-  if (scanf("%i", &ocupado) != 1) {
-    printf("Erro ao ler o status do quarto. ");
-    limparEntrada();
-  };
-
-  if (ocupado != 0 && ocupado != 1) {
-    printf("ERRO! Status do quarto inválido!");
+  if(ocupado == 1) {
+    strcpy(qua.status, "ocupado");
   } else {
-    if (ocupado == 0) {
-      strcpy(qrt.status, "desocupado");
-    } else {
-      strcpy(qrt.status, "ocupado");
-    }
+    strcpy(qua.status, "desocupado");
   }
 
   limparEntrada();
 
+  fseek(f, 0, SEEK_END);
+  fwrite(&qua, sizeof(qua), 1, f);
+  fflush(f);
   printf("\n");
-  printf("O número do quarto é: %i \n", qrt.numero);
-  printf("A quantidade de hóspedes do quarto é: %i \n", qrt.quantHosp);
-  printf("O valor da diária do quarto é: R$ %.2f \n", qrt.diaria);
-  printf("O quarto está %s\n", qrt.status);
 
-  printf("\n");
+  lerQuartos(f);
 }
 
-int carregaData(int part) {
-  time_t t = time(NULL);
-  struct tm *data = localtime(&t);
-
-  return part;
+void lerEstadias(FILE *f) {
+  estadia est;
+  fseek(f, 0, SEEK_SET); // Voltar ao início do arquivo
+  while (fread(&est, sizeof(est), 1, f) == 1) {
+    printf("Código do cliente: %d\n", est.codCli);
+    printf("Quantidade de hóspedes: %i\n", est.quantHosp);
+    printf("Data de entrada: %i \n", est.dataEntrada);
+    printf("Data de saída: %i \n\n", est.dataSaida);
+  }
 }
 
-struct Testadia {
-  int codCli;
-  int quantHosp;
-  int dataEntrada;
-  int dataSaida;
-};
-typedef struct Testadia estadia;
-
-void cadEstadia() {
+void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
   /*
     Este é o procedimento cadEstadia().
 
-    Descrição: 
+    Descrição:
 
-    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o código não vai retornar um valor.
+    Este procedimento não tem parâmetros, e, por se tratar de um procedimento, o
+    código não vai retornar um valor.
   */
 
   estadia est;
-  int dEntrEnter, dSaiEnter;
+  cliente cli;
+  char clienteEncontrado[200];
 
   limparEntrada();
+  printf(">> CADASTRAR UMA ESTADIA \n\n");
+
+  printf("Digite o código do cliente que quer cadastrar sua estadia: ");
+  scanf("%i", &est.codCli);
+  int checkCli = localizaCliente(f_cli, est.codCli);
+  int checkEst = localizaEstadia(f_est, est.codCli);
+
+  while(checkCli == -1) {
+    printf("O cliente não está cadastrado! \n");
+    printf("Digite outro código: ");
+    scanf("%i", &est.codCli);
+    checkCli = localizaCliente(f_cli, est.codCli);
+  }
+
+  while(checkEst != -1) {
+    printf("O cliente já cadastrou uma estadia! \n");
+    printf("Digite outro código: ");
+    scanf("%i", &est.codCli);
+    checkEst = localizaEstadia(f_est, est.codCli);
+  }
+
+  printf("\n> Cadastrando estadia do cliente. \n\n");
+
+  printf("Digite a quantidade de hóspedes que querem se hospedar: ");
+  scanf("%i", &est.quantHosp);
+  int checkQua = localizaQuartoPorQtd(f_qua, est.quantHosp);
+
+  while(est.quantHosp <= 0) {
+    printf("\nQuantidade de hóspedes inválida! \n");
+    printf("Digite outra quantidade de hóspedes: ");
+    scanf("%i", &est.quantHosp);
+  }
+
+  while(checkQua == -1) {
+    if(est.quantHosp == 1) {
+      printf("\nNão há quartos disponíveis no hotel hoje. \n");
+      return;
+    } else {
+      printf("\nNão há um quarto disponível para %i hóspedes no momento. \n", est.quantHosp);
+      printf("Digite outra quantidade de hóspedes: ");
+      scanf("%i", &est.quantHosp);
+      checkQua = localizaQuartoPorQtd(f_qua, est.quantHosp);
+    }
+  }
+
+  printf("Digite a data de check-in no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
+  scanf("%i", &est.dataEntrada);
+  printf("Digite a data de check-out no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
+  scanf("%i", &est.dataSaida);
+
+  int Ndiarias = calculaDiarias(est.dataEntrada, est.dataSaida);
+
+  printf("\nO número de diarias a serem pagas é %i", Ndiarias);
+
+  fseek(f_est, 0, SEEK_END);
+  fwrite(&est, sizeof(est), 1, f_est);
+  fflush(f_est);
+
+  printf("\n");
+
+  lerEstadias(f_est);
+
+  /* limparEntrada();
 
   printf(">> CADASTRAR UMA ESTADIA \n\n");
 
   printf("Digite o código do cliente que quer se cadastrar: ");
-  if(scanf("%i", &est.codCli) != 1) {
+  if (scanf("%i", &est.codCli) != 1) {
     printf("Erro de leitura na entrada de dados.");
   }
 
   printf("\nDigite a quantidade de hóspedes: ");
-  if(scanf("%i", &est.quantHosp) != 1) {
+  if (scanf("%i", &est.quantHosp) != 1) {
     printf("Erro de leitura na entrada de dados.");
   }
 
   printf("\nDigite a data de entrada: ");
-  if(scanf("%i", &dEntrEnter) != 1) {
+  if (scanf("%i", &dEntrEnter) != 1) {
     printf("Erro de leitura na entrada de dados.");
   }
 
   printf("\nDigite a data de saída: ");
-  if(scanf("%i", &dSaiEnter) != 1) {
+  if (scanf("%i", &dSaiEnter) != 1) {
     printf("Erro de leitura na entrada de dados.");
-  }
-
+  } */
 }
-
 
 int geraCodigo(int min, int max) {
   /*
     Esta é a função geraCodigo(int min, int max).
 
-    Descrição: A função utiliza os dois números gerados pelos procedimentos como menor e maior número dentro de um 
-    intervalo de números aleatórios que podem ser gerados e retorna o número para ser usado como código para os
+    Descrição: A função utiliza os dois números gerados pelos procedimentos como
+    menor e maior número dentro de um intervalo de números aleatórios que podem
+    ser gerados e retorna o número para ser usado como código para os
     procedimentos cadCliente e cadFuncionario
 
     Parâmetros:
@@ -423,13 +459,118 @@ int geraCodigo(int min, int max) {
 
     Retorno:
     tipo: int
-    Valores: número aleatório entre o número mínimo e máximo para ser usado como código
+    Valores: número aleatório entre o número mínimo e máximo para ser usado como
+    código
   */
 
-  int codigo = rand() % (max - min + 1) + min;
-  return codigo;
+  return min + rand() % (max - min + 1);
 }
 
-void CalculaData() {
+int localizaCliente(FILE *f, int codigo) {
+  int posicao = 1, achou = 0;
+  cliente cli;
 
+  fseek(f, 0, SEEK_SET);
+  fread(&cli, sizeof(cli), 1, f);
+
+  while (!feof(f) && !achou) {
+    posicao++;
+    if (cli.codigo == codigo) {
+      achou = 1;
+    }
+    fread(&cli, sizeof(cli), 1, f);
+  }
+  if (achou) {
+    return posicao;
+  } else {
+    return -1;
+  }
+}
+
+int localizaFuncionario(FILE *f, int codigo) {
+  int posicao = 1, achou = 0;
+
+  funcionario fun;
+  fseek(f, 0, SEEK_SET);
+  fread(&fun, sizeof(fun), 1, f);
+
+  while (!feof(f) && !achou) {
+    posicao++;
+    if (fun.codigo == codigo) {
+      achou = 1;
+    }
+    fread(&fun, sizeof(fun), 1, f);
+  }
+  if (achou) {
+    return posicao;
+  } else {
+    return -1;
+  }
+}
+
+int localizaQuarto(FILE *f, int numero) {
+  int posicao = 1, achou = 0;
+
+  quarto qua;
+  fseek(f, 0, SEEK_SET);
+  fread(&qua, sizeof(qua), 1, f);
+
+  while (!feof(f) && !achou) {
+    posicao++;
+    if (qua.numero == numero) {
+      achou = 1;
+    }
+    fread(&qua, sizeof(qua), 1, f);
+  }
+  if (achou) {
+    return posicao;
+  } else {
+    return -1;
+  }
+}
+
+int localizaQuartoPorQtd(FILE *f, int quantHosp) {
+  int posicao = 1, achou = 0;
+
+  quarto qua;
+  fseek(f, 0, SEEK_SET);
+  fread(&qua, sizeof(qua), 1, f);
+
+  while (!feof(f) && !achou) {
+    posicao++;
+    if (qua.quantHosp >= quantHosp && strcmp(qua.status, "desocupado") == 0) {
+      achou = 1;
+    }
+    fread(&qua, sizeof(qua), 1, f);
+  }
+  if (achou) {
+    return posicao;
+  } else {
+    return -1;
+  }
+}
+
+int localizaEstadia(FILE *f, int codCli) {
+  int posicao = 1, achou = 0;
+
+  estadia est;
+  fseek(f, 0, SEEK_SET);
+  fread(&est, sizeof(est), 1, f);
+
+  while (!feof(f) && !achou) {
+    posicao++;
+    if (est.codCli == codCli) {
+      achou = 1;
+    }
+    fread(&est, sizeof(est), 1, f);
+  }
+  if (achou) {
+    return posicao;
+  } else {
+    return -1;
+  }
+}
+
+int calculaDiarias(int checkin, int checkout) {
+  // fazer o cálculo correto da quantidade de diárias
 }
