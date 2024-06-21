@@ -58,16 +58,18 @@ int main() {
   printf("2 - Cadastrar um funcionário \n");
   printf("3 - Cadastrar um quarto \n");
   printf("4 - Cadastrar uma estadia \n");
-  printf("5 - Pesquisar \n");
-  printf("6 - Dar baixa em estadia \n");
-  printf("7 - SAIR \n\n");
+  printf("5 - Dar baixa em estadia \n");
+  printf("6 - Pesquisar cliente ou funcionário \n");
+  printf("7 - Mostrar estadias de um cliente \n");
+  printf("8 - Ver pontos de fidelidade de um cliente \n");
+  printf("9 - SAIR\n\n");
 
   if (scanf("%i", &escolha) != 1) {
     printf("Erro ao ler a escolha.");
   }
   printf("\n\n");
 
-  while (escolha != 7 && escolha < 7 && escolha > 0) {
+  while (escolha != 9 && escolha < 9 && escolha > 0) {
     switch (escolha) {
     case 1:
       cadCliente(cliFile);
@@ -80,11 +82,11 @@ int main() {
       break;
     case 4: cadEstadia(estFile, cliFile, quaFile);
       break;
-    case 5: /*função*/;
+    case 5: baixaEstadia(estFile, cliFile, quaFile);
       break;
     case 6: /*função*/;
       break;
-    }
+  }
 
   printf("=== BEM-VINDO AO HOTEL DESCANSO GARANTIDO === \n\n");
   printf("Menu \n\n");
@@ -92,9 +94,11 @@ int main() {
   printf("2 - Cadastrar um funcionário \n");
   printf("3 - Cadastrar um quarto \n");
   printf("4 - Cadastrar uma estadia \n");
-  printf("5 - Pesquisar \n");
-  printf("6 - Dar baixa em estadia \n");
-  printf("7 - SAIR \n\n");
+  printf("5 - Dar baixa em estadia \n");
+  printf("6 - Pesquisar cliente ou funcionário \n");
+  printf("7 - Mostrar estadias de um cliente \n");
+  printf("8 - Ver pontos de fidelidade de um cliente \n");
+  printf("9 - SAIR\n\n");
 
   if (scanf("%i", &escolha) != 1) {
     printf("Erro ao ler a escolha.");

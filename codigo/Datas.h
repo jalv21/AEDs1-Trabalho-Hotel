@@ -13,14 +13,12 @@ Autor: J
 Data de início: 14 Jun. 2024
 */
 #include <stdio.h>
-#ifndef PROCESS_H
-#define PROCESS_H
+#ifndef DATAS_H
+#define DATAS_H
 
-void cadCliente(FILE *f);
-void cadFuncionario(FILE *f);
-void cadQuarto(FILE *f);
-void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua);
-void baixaEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua);
+int bissexto(int ano);
+int diasnomes(int ano, int mes);
+int diasRef(int ano, int mes, int dia);
 
 #endif 
 

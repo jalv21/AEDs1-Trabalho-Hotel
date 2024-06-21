@@ -27,6 +27,7 @@ Data de início: 14 Jun. 2024
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "Datas.h"
 
 struct Tcliente {
   /*
@@ -110,7 +111,7 @@ int localizaCliente(FILE *f, int codigo);
 int localizaFuncionario(FILE *f, int codigo);
 int localizaQuarto(FILE *f, int numero);
 int localizaQuartoPorQtd(FILE *f, int quantHosp);
-int calculaDiarias(int checkin, int checkout);
+int calculaDiarias(int dataIn, int dataOut);
 int localizaEstadia(FILE *f, int codigo);
 
 void limparEntrada() {
@@ -354,7 +355,6 @@ void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
 
   estadia est;
   cliente cli;
-  char clienteEncontrado[200];
 
   limparEntrada();
   printf(">> CADASTRAR UMA ESTADIA \n\n");
@@ -369,13 +369,6 @@ void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
     printf("Digite outro código: ");
     scanf("%i", &est.codCli);
     checkCli = localizaCliente(f_cli, est.codCli);
-  }
-
-  while(checkEst != -1) {
-    printf("O cliente já cadastrou uma estadia! \n");
-    printf("Digite outro código: ");
-    scanf("%i", &est.codCli);
-    checkEst = localizaEstadia(f_est, est.codCli);
   }
 
   printf("\n> Cadastrando estadia do cliente. \n\n");
@@ -407,9 +400,7 @@ void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
   printf("Digite a data de check-out no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
   scanf("%i", &est.dataSaida);
 
-  int Ndiarias = calculaDiarias(est.dataEntrada, est.dataSaida);
-
-  printf("\nO número de diarias a serem pagas é %i", Ndiarias);
+  printf("\nO número de estadias a serem pagas é %i\n", calculaDiarias(est.dataEntrada, est.dataSaida));
 
   fseek(f_est, 0, SEEK_END);
   fwrite(&est, sizeof(est), 1, f_est);
@@ -442,6 +433,31 @@ void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
   if (scanf("%i", &dSaiEnter) != 1) {
     printf("Erro de leitura na entrada de dados.");
   } */
+}
+
+void baixaEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
+  estadia est;
+  cliente cli;
+
+  limparEntrada();
+  printf(">> DAR BAIXA EM UMA ESTADIA\n\n");
+
+  printf("Digite o código do cliente que cadastrou a estadia: ");
+  scanf("%i", &est.codCli);
+  int checkCli = localizaCliente(f_cli, est.codCli);
+  int checkEst = localizaEstadia(f_est, est.codCli);
+
+  while(checkCli == -1 || checkEst == -1) {
+    printf("O cliente ou a estadia não estão cadastrados! \n");
+    printf("Digite o código de um cliente cadastrado que possui uma estadia cadastrada: ");
+    scanf("%i", &est.codCli);
+    checkCli = localizaCliente(f_cli, est.codCli);
+    checkEst = localizaEstadia(f_est, est.codCli);
+  }
+
+  printf("\n> Dando baixa na estadia do cliente. \n\n");
+
+
 }
 
 int geraCodigo(int min, int max) {
@@ -538,16 +554,37 @@ int localizaQuartoPorQtd(FILE *f, int quantHosp) {
 
   while (!feof(f) && !achou) {
     posicao++;
-    if (qua.quantHosp >= quantHosp && strcmp(qua.status, "desocupado") == 0) {
+    if(qua.quantHosp == quantHosp && strcmp(qua.status, "desocupado") == 0) {
       achou = 1;
+      strcpy(qua.status, "ocupado");
+
+      fseek(f, -sizeof(qua), SEEK_CUR);
+      fwrite(&qua, sizeof(qua), 1, f);
+      fflush(f);
+
+      return posicao;
     }
     fread(&qua, sizeof(qua), 1, f);
   }
-  if (achou) {
-    return posicao;
-  } else {
-    return -1;
+
+  fseek(f, 0, SEEK_SET);
+  posicao = 1;
+
+  while (!feof(f) && !achou) {
+    posicao++;
+    if(qua.quantHosp > quantHosp && strcmp(qua.status, "desocupado") == 0) {
+      achou = 1;
+      strcpy(qua.status, "ocupado");
+
+      fseek(f, -sizeof(qua), SEEK_CUR);
+      fwrite(&qua, sizeof(qua), 1, f);
+      fflush(f);
+
+      return posicao;
+    }
+    fread(&qua, sizeof(qua), 1, f);
   }
+  return -1;
 }
 
 int localizaEstadia(FILE *f, int codCli) {
@@ -571,6 +608,17 @@ int localizaEstadia(FILE *f, int codCli) {
   }
 }
 
-int calculaDiarias(int checkin, int checkout) {
-  // fazer o cálculo correto da quantidade de diárias
+int calculaDiarias(int dataIn, int dataOut) {
+  int anoIn = dataIn / 10000;
+  int mesIn = (dataIn % 10000) / 100;
+  int diaIn = dataIn % 100;
+
+  int anoOut = dataOut / 10000;
+  int mesOut = (dataOut % 10000) / 100;
+  int diaOut = dataOut % 100;
+
+  int diasIn = diasRef(anoIn, mesIn, diaIn);
+  int diasOut = diasRef(anoOut, mesOut, diasOut);
+
+  return diasOut - diasIn;
 }
