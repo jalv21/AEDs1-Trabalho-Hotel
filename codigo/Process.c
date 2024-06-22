@@ -110,7 +110,7 @@ int geraCodigo(int min, int max);
 int localizaCliente(FILE *f, int codigo);
 int localizaFuncionario(FILE *f, int codigo);
 int localizaQuarto(FILE *f, int numero);
-int localizaQuartoPorQtd(FILE *f, int quantHosp);
+int localizaQuartoPorInfo(FILE *f_qua, int quantHosp);
 int calculaDiarias(int dataIn, int dataOut);
 int localizaEstadia(FILE *f, int codigo);
 
@@ -375,7 +375,13 @@ void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
 
   printf("Digite a quantidade de hóspedes que querem se hospedar: ");
   scanf("%i", &est.quantHosp);
-  int checkQua = localizaQuartoPorQtd(f_qua, est.quantHosp);
+
+  printf("Digite a data de check-in no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
+  scanf("%i", &est.dataEntrada);
+  printf("Digite a data de check-out no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
+  scanf("%i", &est.dataSaida);
+
+  int checkQua = localizaQuartoPorInfo(f_qua, est.quantHosp);
 
   while(est.quantHosp <= 0) {
     printf("\nQuantidade de hóspedes inválida! \n");
@@ -384,21 +390,11 @@ void cadEstadia(FILE *f_est, FILE *f_cli, FILE *f_qua) {
   }
 
   while(checkQua == -1) {
-    if(est.quantHosp == 1) {
-      printf("\nNão há quartos disponíveis no hotel hoje. \n");
-      return;
-    } else {
-      printf("\nNão há um quarto disponível para %i hóspedes no momento. \n", est.quantHosp);
+      printf("Não há quartos disponíveis para %i hóspedes por enquanto. ", est.quantHosp);
       printf("Digite outra quantidade de hóspedes: ");
       scanf("%i", &est.quantHosp);
-      checkQua = localizaQuartoPorQtd(f_qua, est.quantHosp);
-    }
+      checkQua = localizaQuartoPorInfo(f_qua, est.quantHosp);
   }
-
-  printf("Digite a data de check-in no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
-  scanf("%i", &est.dataEntrada);
-  printf("Digite a data de check-out no hotel ('ANOMESDIA' - sem espaços, hífens ou barras): ");
-  scanf("%i", &est.dataSaida);
 
   printf("\nO número de estadias a serem pagas é %i\n", calculaDiarias(est.dataEntrada, est.dataSaida));
 
@@ -545,44 +541,44 @@ int localizaQuarto(FILE *f, int numero) {
   }
 }
 
-int localizaQuartoPorQtd(FILE *f, int quantHosp) {
+int localizaQuartoPorInfo(FILE *f_qua, int quantHosp) {
   int posicao = 1, achou = 0;
 
   quarto qua;
-  fseek(f, 0, SEEK_SET);
-  fread(&qua, sizeof(qua), 1, f);
+  fseek(f_qua, 0, SEEK_SET);
 
-  while (!feof(f) && !achou) {
-    posicao++;
-    if(qua.quantHosp == quantHosp && strcmp(qua.status, "desocupado") == 0) {
-      achou = 1;
-      strcpy(qua.status, "ocupado");
+  while (fread(&qua, sizeof(qua), 1, f_qua) == 1 && !achou) {
+    if(strcmp(qua.status, "desocupado") == 0 && qua.quantHosp == quantHosp) {
+        achou = 1;
+        strcpy(qua.status, "ocupado");
+        printf("Encontrado quarto %i", qua.numero);
 
-      fseek(f, -sizeof(qua), SEEK_CUR);
-      fwrite(&qua, sizeof(qua), 1, f);
-      fflush(f);
+        fseek(f_qua, -sizeof(qua), SEEK_CUR);
+        fwrite(&qua, sizeof(qua), 1, f_qua);
+        fflush(f_qua);
 
-      return posicao;
+        return posicao;
     }
-    fread(&qua, sizeof(qua), 1, f);
+    posicao++;
   }
 
-  fseek(f, 0, SEEK_SET);
+  fseek(f_qua, 0, SEEK_SET);
   posicao = 1;
 
-  while (!feof(f) && !achou) {
-    posicao++;
-    if(qua.quantHosp > quantHosp && strcmp(qua.status, "desocupado") == 0) {
+  while (fread(&qua, sizeof(qua), 1, f_qua) == 1 && !achou) {
+    if(strcmp(qua.status, "desocupado") == 0 && qua.quantHosp > quantHosp) {
       achou = 1;
-      strcpy(qua.status, "ocupado");
 
-      fseek(f, -sizeof(qua), SEEK_CUR);
-      fwrite(&qua, sizeof(qua), 1, f);
-      fflush(f);
+      strcpy(qua.status, "ocupado");
+      printf("Encontrado quarto %i", qua.numero);
+
+      fseek(f_qua, -sizeof(qua), SEEK_CUR);
+      fwrite(&qua, sizeof(qua), 1, f_qua);
+      fflush(f_qua);
 
       return posicao;
     }
-    fread(&qua, sizeof(qua), 1, f);
+    posicao++;
   }
   return -1;
 }
